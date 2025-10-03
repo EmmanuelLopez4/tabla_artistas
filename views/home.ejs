@@ -1,0 +1,38 @@
+<%- include("templates/header.ejs") %>
+     <h1 class="text-primary">Inicio</h1>
+     <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+     quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+     consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+     cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+     proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<%
+     var a = 5
+     var b = 10
+     var c = a+b
+     var texto = "Hola es el valor de una variable"
+%>
+     <%= "La suma de a + b es: " + c%>
+
+     <a href="/info/<%= c %>/<%= texto %>">Enviar datos</a>
+
+     <ul>
+          <% artistas.forEach((artista) => { %>
+          <li><%= artista %></li>
+          <% }) %>
+     </ul>
+
+     <table class="table">
+          <thead>
+          <td class="table-primary">Nombre de Artistas</td>
+          </thead>
+          <tbody>
+          <% artistas.forEach((artis) => { %>
+          <tr>
+               <th class="table-danger"> <%= artis %> </th>
+          </tr>
+          <% }) %>
+          </tbody>
+     </table>
+
+<%- include("templates/flooter.ejs") %>
