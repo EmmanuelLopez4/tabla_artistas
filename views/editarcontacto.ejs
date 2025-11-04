@@ -1,0 +1,18 @@
+<%- include("templates/header.ejs", {titulo: "Contáctanos"}) %>
+  <div class= "container my-4">
+
+  <form action="/editarContacto" id="formulario" method="POST">
+
+  <input type="hidden" name="id" value="<%= contactoBD._id %>">
+
+  <label>Nombre</label>
+  <input class="form-control mb-3" type="text" name="nombre" id="nombre" value="<%= contactoBD.nombre %>">
+  
+  <label>Edad</label>
+  <input class="form-control mb-3" type="text" name="edad" id="edad" value="<%= contactoBD.edad %>">
+
+
+  <button type="submit" class="btn btn-primary">EditarContacto</button>
+</form>
+</div>
+<%- include("templates/flooter.ejs") %>

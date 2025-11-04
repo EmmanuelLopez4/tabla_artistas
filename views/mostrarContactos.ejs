@@ -1,0 +1,24 @@
+<%- include("templates/header.ejs", {titulo: "Contactos"}) %>
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Edad</th>
+            <th>Editar / Borrar</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% contactoBD.forEach((contacto)=>{ %>
+            <tr>
+            <td><%= contacto.nombre %></td>
+            <td><%= contacto.edad %></td>
+            <td>
+                 <a href="/editarContacto/<%= contacto._id %>">Editar</a>
+                 <a href="/borrarContacto/<%= contacto._id %>">Borrar</a>
+            </td>
+        </tr>
+        <% }) %>
+
+    </tbody>
+</table>
+<%- include("templates/flooter.ejs") %>

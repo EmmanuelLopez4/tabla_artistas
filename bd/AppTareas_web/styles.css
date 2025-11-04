@@ -1,0 +1,249 @@
+:root {
+  --bg: #f3f7fb;
+  --card: #eaf2fb;
+  --accent: #2b7be4;
+  --green: #417d40;
+  --orange: #d46a1c;
+  --gray: #777;
+  --yellow: #f4b400;
+  --blue: #4285f4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  margin: 0;
+  background: var(--bg);
+  color: #1a202c;
+}
+
+.container {
+  max-width: 980px;
+  margin: 28px auto;
+  padding: 16px;
+}
+
+.site-header {
+  background: linear-gradient(90deg, #dceeff, #f7fbff);
+  padding: 28px 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+
+.card {
+  background: var(--card);
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(30, 60, 120, 0.06);
+}
+
+.optional {
+  color: #555;
+  font-size: 14px;
+}
+
+/* ====== APP DE TAREAS ====== */
+.task-app {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.tasks {
+  min-height: 240px;
+}
+
+.task {
+  background: white;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 6px 14px rgba(20, 30, 60, 0.04);
+}
+
+.task .left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.badge {
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+input,
+select,
+textarea {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+button {
+  background: var(--accent);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1d5ec4;
+}
+
+small {
+  color: #666;
+}
+
+.notes ul {
+  padding-left: 18px;
+}
+
+/* ====== ISO 27000 PAGE ====== */
+
+header {
+  background: linear-gradient(90deg, #e8f0fe, #ffffff);
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+}
+
+header h1 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 24px;
+}
+
+nav {
+  margin-top: 10px;
+}
+
+nav a {
+  text-decoration: none;
+  margin: 0 10px;
+  color: #1a202c;
+  font-weight: 500;
+}
+
+nav a:hover,
+nav a.active {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.iso-image {
+  display: block;
+  margin: 20px auto;
+  max-width: 380px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.intro {
+  text-align: center;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  margin: 20px auto;
+  max-width: 850px;
+  box-shadow: 0 6px 18px rgba(30, 60, 120, 0.06);
+}
+
+.phases {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin: 30px;
+}
+
+.phase {
+  width: 300px;
+  padding: 18px;
+  border-radius: 14px;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s;
+}
+
+.phase:hover {
+  transform: scale(1.05);
+}
+
+.phase h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.phase p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Colores de fases */
+.green {
+  background: var(--green);
+}
+
+.orange {
+  background: var(--orange);
+}
+
+.gray {
+  background: var(--gray);
+}
+
+.yellow {
+  background: var(--yellow);
+  color: #000;
+}
+
+.blue {
+  background: var(--blue);
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #f1f5fb;
+  color: #333;
+  margin-top: 40px;
+  border-top: 1px solid #ddd;
+}
+
+/* RESPONSIVE */
+@media (max-width: 820px) {
+  .task-app {
+    grid-template-columns: 1fr;
+  }
+
+  .phase {
+    width: 90%;
+  }
+
+  .intro {
+    margin: 10px;
+  }
+}

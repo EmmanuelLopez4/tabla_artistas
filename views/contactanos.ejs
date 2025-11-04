@@ -1,0 +1,15 @@
+<%- include("templates/header.ejs", {titulo: "Contáctanos"}) %>
+  <div class= "container my-4">
+
+  <form action="/contactanos" id="formulario" method="POST">
+
+  <label>Nombre</label>
+  <input class="form-control mb-3" type="text" name="nombre" id="nombre" placeholder="Nombre">
+
+  <label>Edad</label>
+  <input class="form-control mb-3" type="text" name="edad" id="edad" placeholder="Edad">
+
+  <button type="submit" class="btn btn-primary">Enviar datos</button>
+</form>
+</div>
+<%- include("templates/flooter.ejs") %>

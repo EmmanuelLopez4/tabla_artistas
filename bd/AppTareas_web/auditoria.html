@@ -1,0 +1,64 @@
+<!-- auditoria.html -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Auditoría — Gestor de Tareas</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Registro de Auditoría</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="iso27000.html">ISO 27000</a>
+      <a href="privacidad.html">Privacidad</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Eventos registrados</h2>
+      <p>Este registro almacena eventos relevantes (creación de tareas, marcados como completadas, etc.). Los registros se guardan en el almacenamiento local del navegador para esta demo.</p>
+      <div id="auditList" style="max-height:520px;overflow:auto;padding:8px;border-radius:8px;background:#fff;"></div>
+      <p style="margin-top:12px;color:#666;font-size:13px">Nota: para entornos productivos la auditoría debe estar en un repositorio inmutable (servidor/SIEM) con control de acceso.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Gestor de Tareas</p>
+  </footer>
+
+  <script src="security.js"></script>
+  <script>
+    (function(){
+      function render(){
+        const list = window.security_getAudit ? window.security_getAudit() : [];
+        const container = document.getElementById('auditList');
+        container.innerHTML = '';
+        if (!list || list.length === 0) {
+          container.innerHTML = '<p style="color:#555">No hay eventos registrados.</p>';
+          return;
+        }
+        list.slice().reverse().forEach(ev => {
+          const box = document.createElement('div');
+          box.style.padding = '10px';
+          box.style.marginBottom = '8px';
+          box.style.borderRadius = '8px';
+          box.style.background = '#f7fafc';
+          box.style.border = '1px solid rgba(0,0,0,0.04)';
+          box.innerHTML = `<div style="font-weight:700">${escapeHTML(ev.action)} <span style="font-weight:400;color:#666;font-size:13px"> · ${escapeHTML(ev.timestamp)}</span></div>
+                           <div style="font-size:13px;color:#333;margin-top:6px">${escapeHTML(JSON.stringify(ev.details || {}))}</div>
+                           <div style="font-size:12px;color:#666;margin-top:6px">${escapeHTML(JSON.stringify(ev.meta || {}))}</div>`;
+          container.appendChild(box);
+        });
+      }
+
+      function escapeHTML(s){ return window.security_escapeHTML ? window.security_escapeHTML(s) : (''+s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AppTareas - Demo</title>
+  <!-- Nota: applyCSP() del script de hardening intentará inyectar una meta-CSP,
+       pero en producción debes servir la CSP desde el header HTTP -->
+  <style>
+    body { font-family: Arial, sans-serif; padding: 16px; background:#f5f7fb; color:#222; }
+    .card { background: #fff; padding:12px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08); margin-bottom:12px; }
+    label { display:block; margin-top:8px; font-size:14px; }
+    input, textarea { width:100%; box-sizing:border-box; padding:8px; margin-top:4px; border-radius:4px; border:1px solid #ddd; }
+    button { margin-top:10px; padding:8px 12px; border-radius:6px; border:none; background:#2b6cb0; color:#fff; cursor:pointer; }
+  </style>
+</head>
+<body>
+
+  <h1>AppTareas — Demo</h1>
+
+  <div class="card" id="login-card">
+    <h2>Login (demo)</h2>
+    <p>Este es un formulario de ejemplo para probar el control de intentos.</p>
+    <label for="login-username">Usuario</label>
+    <input id="login-username" type="text" placeholder="usuario demo" />
+    <label for="login-password">Contraseña</label>
+    <input id="login-password" type="password" placeholder="contraseña" />
+    <button id="btn-login">Iniciar sesión (demo)</button>
+    <div id="login-msg" style="margin-top:8px;color:#b00;"></div>
+  </div>
+
+  <div class="card" id="task-card">
+    <h2>Crear tarea</h2>
+    <label for="task-title">Título</label>
+    <input id="task-title" placeholder="Título de la tarea" />
+    <label for="task-desc">Descripción</label>
+    <textarea id="task-desc" rows="3" placeholder="Descripción"></textarea>
+    <label for="task-due">Fecha vencimiento (YYYY-MM-DD)</label>
+    <input id="task-due" placeholder="2025-12-31" />
+    <button id="btn-create-task">Crear tarea (demo)</button>
+    <div id="task-msg" style="margin-top:8px;color:#b00;"></div>
+  </div>
+
+  <div class="card">
+    <h2>Panel de auditoría (demo)</h2>
+    <button id="btn-show-audit">Mostrar logs de auditoría (console)</button>
+    <button id="btn-clear-audit" style="background:#c53030">Limpiar logs (demo)</button>
+    <div style="font-size:13px;margin-top:8px;color:#555">Los logs se almacenan en localStorage (clave <code>st_audit_v1</code>).</div>
+  </div>
+
+  <!-- SCRIPTS: orden importante -->
+  <!-- Tu security.js principal (contiene audit_append). -->
+  <script src="security.js"></script>
+
+  <!-- Aquí van los nuevos módulos en carpeta seguridad/ -->
+  <script src="security/owasp_hardening.js"></script>
+  <script src="security/auth_monitor.js"></script>
+
+  <!-- Tu app principal -->
+  <script src="app.js"></script>
+
+  <!-- Pequeño bootstrap para demo (no sustituye a app.js): conecta botones a las APIs nuevas -->
+  <script>
+    // Demo binding: usa las APIs que implementamos antes.
+    (function () {
+      // LOGIN demo flow (no real auth)
+      const btnLogin = document.getElementById('btn-login');
+      const loginMsg = document.getElementById('login-msg');
+      btnLogin && btnLogin.addEventListener('click', function () {
+        const username = (document.getElementById('login-username') || {}).value || 'demo';
+        const password = (document.getElementById('login-password') || {}).value || '';
+
+        // check if can attempt
+        if (window.auth_canAttempt) {
+          const chk = window.auth_canAttempt(username);
+          if (!chk.ok) {
+            loginMsg.textContent = 'Cuenta temporalmente bloqueada hasta ' + chk.unlockAt;
+            return;
+          }
+        }
+
+        // demo auth: la contraseña correcta es '1234' (solo demo)
+        if (password === '1234') {
+          // success: reset attempts
+          if (window.auth_resetAttempts) window.auth_resetAttempts(username);
+          if (window.security_audit_append) window.security_audit_append({ level: 'info', message: 'user_logged_in', meta: { username } });
+          loginMsg.style.color = 'green';
+          loginMsg.textContent = 'Login exitoso (demo).';
+        } else {
+          // fail: record failed attempt
+          if (window.auth_recordFailedLogin) {
+            const res = window.auth_recordFailedLogin(username);
+            loginMsg.style.color = '#b00';
+            if (res && res.blocked) {
+              loginMsg.textContent = 'Demasiados intentos. Bloqueado hasta ' + res.blockedUntil;
+            } else {
+              loginMsg.textContent = 'Credenciales incorrectas. Intentos en 15min: ' + (res && res.attempts_15min ? res.attempts_15min : 'N/A');
+            }
+          } else {
+            loginMsg.textContent = 'Credenciales incorrectas.';
+          }
+        }
+      });
+
+      // CREATE TASK demo binding
+      const btnCreate = document.getElementById('btn-create-task');
+      const taskMsg = document.getElementById('task-msg');
+      btnCreate && btnCreate.addEventListener('click', function () {
+        const payload = {
+          title: (document.getElementById('task-title') || {}).value,
+          description: (document.getElementById('task-desc') || {}).value,
+          dueDate: (document.getElementById('task-due') || {}).value
+        };
+
+        if (window.owasp_sanitizeTaskPayload) {
+          const res = window.owasp_sanitizeTaskPayload(payload);
+          if (!res.ok) {
+            taskMsg.style.color = '#b00';
+            taskMsg.textContent = 'Errores: ' + res.errors.join('; ');
+            if (window.security_audit_append) {
+              window.security_audit_append({ level: 'warning', message: 'task_validation_failed', meta: { errors: res.errors } });
+            }
+            return;
+          }
+          // Demo: almacenar la tarea en localStorage (o usar la lógica que ya tenga app.js)
+          const tasksRaw = localStorage.getItem('st_tasks_demo') || '[]';
+          const tasks = JSON.parse(tasksRaw);
+          const task = Object.assign({ id: (new Date()).toISOString() }, res.data);
+          tasks.push(task);
+          localStorage.setItem('st_tasks_demo', JSON.stringify(tasks));
+          taskMsg.style.color = 'green';
+          taskMsg.textContent = 'Tarea creada (demo).';
+          if (window.security_audit_append) window.security_audit_append({ level: 'info', message: 'task_created', meta: { title: task.title } });
+        } else {
+          taskMsg.style.color = '#b00';
+          taskMsg.textContent = 'Función de sanitización no disponible.';
+        }
+      });
+
+      // Audit show/clear (console)
+      const btnShow = document.getElementById('btn-show-audit');
+      const btnClear = document.getElementById('btn-clear-audit');
+      btnShow && btnShow.addEventListener('click', function () {
+        if (window.security_audit_getAll) {
+          console.table(window.security_audit_getAll());
+          alert('Revisa la consola para ver los logs de auditoría (demo).');
+        } else {
+          alert('API de auditoría no disponible.');
+        }
+      });
+      btnClear && btnClear.addEventListener('click', function () {
+        if (window.security_audit_clear) {
+          window.security_audit_clear();
+          alert('Logs de auditoría limpiados (demo).');
+        } else {
+          alert('API de auditoría no disponible.');
+        }
+      });
+
+      // Intentional: auto-apply frontend hardening if available (applyCSP + enforceNoInlineHandlers)
+      if (window.owasp_applyCSP) {
+        try { window.owasp_applyCSP(); } catch (e) { /* noop */ }
+      }
+      if (window.owasp_enforceNoInlineHandlers) {
+        try { window.owasp_enforceNoInlineHandlers(); } catch (e) { /* noop */ }
+      }
+    })();
+  </script>
+
+</body>
+</html>

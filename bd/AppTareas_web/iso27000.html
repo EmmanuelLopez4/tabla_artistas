@@ -1,0 +1,133 @@
+<!-- iso27000.html -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ISO 27000 — Gestor de Tareas</title>
+  <link rel="stylesheet" href="styles.css" />
+  <meta name="referrer" content="no-referrer" />
+</head>
+<body>
+  <header>
+    <h1>Gestor de Tareas — ISO/IEC 27000</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="iso27000.html" class="active">ISO 27000</a>
+      <a href="privacidad.html">Privacidad</a>
+      <a href="seguridad_politica.html">Política de Seguridad</a>
+      <a href="auditoria.html">Auditoría</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="intro card">
+      <h2>Implementación práctica de ISO/IEC 27000</h2>
+      <p>Esta sección conecta las fases del ciclo ISO 27000 con tareas concretas dentro del gestor. Usa el formulario para crear tareas asociadas a cada fase; el sistema validará, sanitizará y registrará cada acción en el log de auditoría.</p>
+      <img src="img/ciclo_iso27000.png" alt="Ciclo ISO 27000" class="iso-image" />
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <h3>Crear tarea vinculada a una fase ISO</h3>
+      <form id="isoTaskForm">
+        <label>Título</label>
+        <input id="isoTitle" placeholder="Título de la tarea" required />
+        <label>Descripción</label>
+        <textarea id="isoDesc" rows="3" placeholder="Descripción (opcional)"></textarea>
+
+        <label>Fase ISO</label>
+        <select id="isoPhase" required>
+          <option value="">-- Selecciona fase --</option>
+          <option value="01">01. Alcance y planeación</option>
+          <option value="02">02. Documentación y herramientas</option>
+          <option value="03">03. Capacitación e implementación</option>
+          <option value="04">04. Auditoría interna y revisión</option>
+          <option value="05">05. Auditoría de certificación</option>
+        </select>
+
+        <label>Plazo (fecha)</label>
+        <input id="isoDue" type="date" />
+
+        <button id="isoCreateBtn" type="submit">Crear tarea ISO</button>
+        <small>Las entradas serán validadas y registradas para auditoría.</small>
+      </form>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <h3>Tareas por fase</h3>
+      <div id="isoTasksContainer" class="phases" style="justify-content:flex-start;"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Gestor de Tareas — Implementación basada en ISO/IEC 27000</p>
+  </footer>
+
+  <!-- Llama a security.js (contiene validación y auditoría) -->
+  <script src="security.js"></script>
+  <script>
+    // Código corto específico para iso27000.html que usa security.js
+    (function(){
+      // Mostrar tareas por fase
+      const container = document.getElementById('isoTasksContainer');
+      function renderTasks() {
+        container.innerHTML = '';
+        const tasks = security_getAllTasks(); // función expuesta en security.js
+        if (!tasks || tasks.length === 0) {
+          container.innerHTML = '<p style="color:#555">No hay tareas ISO creadas todavía.</p>';
+          return;
+        }
+        tasks.forEach(t => {
+          const div = document.createElement('div');
+          div.className = 'phase';
+          // color según fase
+          let cls = 'gray';
+          if (t.phase === '01') cls = 'green';
+          if (t.phase === '02') cls = 'orange';
+          if (t.phase === '03') cls = 'gray';
+          if (t.phase === '04') cls = 'yellow';
+          if (t.phase === '05') cls = 'blue';
+          div.classList.add(cls);
+          div.style.width = 'calc(33% - 18px)';
+          div.innerHTML = `<h3>${t.phase} — ${escapeHTML(t.title)}</h3>
+                           <p style="color:rgba(255,255,255,0.95)">${escapeHTML(t.desc || '')}</p>
+                           <p style="font-size:12px;opacity:0.9">Plazo: ${t.due || '—'} · ID:${t.id}</p>
+                           <button data-id="${t.id}" style="margin-top:8px;padding:6px 8px;border-radius:8px;border:0;cursor:pointer">Marcar completada</button>`;
+          container.appendChild(div);
+
+          // marcar completada
+          div.querySelector('button').addEventListener('click', e => {
+            const id = e.target.getAttribute('data-id');
+            security_markTaskDone(id);
+            renderTasks();
+          });
+        });
+      }
+
+      // helpers expuestos (se declaran en security.js)
+      const isoForm = document.getElementById('isoTaskForm');
+      isoForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        const title = document.getElementById('isoTitle').value;
+        const desc = document.getElementById('isoDesc').value;
+        const phase = document.getElementById('isoPhase').value;
+        const due = document.getElementById('isoDue').value;
+        const res = security_createTask({ title, desc, phase, due, origin: 'iso27000.html' });
+        if (res && res.ok) {
+          alert('Tarea ISO creada y registrada en auditoría.');
+          isoForm.reset();
+          renderTasks();
+        } else {
+          alert('Error: ' + (res && res.error ? res.error : 'entrada inválida'));
+        }
+      });
+
+      // escapeHTML exposer para este script (security.js lo define)
+      function escapeHTML(s){ return window.security_escapeHTML ? window.security_escapeHTML(s) : (''+s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+      // inicial render
+      renderTasks();
+    })();
+  </script>
+</body>
+</html>
